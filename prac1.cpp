@@ -1,12 +1,14 @@
 #include <iostream>
 #include <vector>
 #include <iomanip>
+#include <cstdlib>
 
 using std::vector;
 using std::cout;
 using std::setw;
 using std::right;
 using std::left;
+using std::rand;
 
 class SortingAlgorithms
 {
@@ -34,7 +36,7 @@ public:
         {
             Sorted = true;
 
-            for(int i = 0; i < vect.size() - sortedItems; i++)
+            for(int i = 0; i < (int)vect.size() - sortedItems - 1; i++)
             {
                 if(vect[i] > vect[i+1])
                 {
@@ -80,7 +82,7 @@ public:
         int mergeIndex = l;
         while(leftIndex < leftLen && rightIndex < rightLen)
         {
-            if(leftV[leftIndex] < rightV[rightIndex])
+            if(leftV[leftIndex] <= rightV[rightIndex])
             {
                 vect[mergeIndex++] = leftV[leftIndex++];
             }
@@ -101,11 +103,12 @@ public:
         }
     }
 
-    void PrintVector(vector<int> vect)
+    void PrintVector(const vector<int>& vect)
     {
-        for(int i = 0; i < vect.size(); i++)
+        for(int i = 0; i < (int)vect.size(); i++)
         {
-            if((i+1) % 10 == 0){
+            if((i+1) % 10 == 0 || i == (int)vect.size() - 1)
+            {
                 cout << setw(5) << right << vect[i] << '\n';
             }
             else
@@ -136,13 +139,12 @@ int main()
     cout << "\n>>> MergeSort <<<\n";
 
     vector<int> msV = unsortedVector;
-    Sort.MergeSort(msV, 0, msV.size());
+    Sort.MergeSort(msV, 0, (int)msV.size() - 1);
 
-    Sort.PrintVector(bsV);
+    Sort.PrintVector(msV);
 
     cout << "\n";
 
 
     return 0;
 }
-
