@@ -51,6 +51,43 @@ public:
         }
     }
 
+    void SelectionSort(vector<int>& vect)
+    {
+        for(int i = 0; i < (int)vect.size() - 1; i++)
+        {
+            int smallestIndex = i;
+
+            for(int j = i+1; j < (int)vect.size(); j++)
+            {
+                if(vect[j] < vect[smallestIndex])
+                {
+                    smallestIndex = j;
+                }
+            }
+
+            int tmp = vect[i];
+            vect[i] = vect[smallestIndex];
+            vect[smallestIndex] = tmp;
+        }
+    }
+
+    void InsertionSort(vector<int>& vect)
+    {
+        for(int i = 1; i < (int)vect.size(); i++)
+        {
+            int currentItem = vect[i];
+            int j = i-1;
+
+            while(j >= 0 && vect[j] > currentItem)
+            {
+                vect[j+1] = vect[j];
+                j--;
+            }
+
+            vect[j+1] = currentItem;
+        }
+    }
+
     void MergeSort(vector<int>& vect, int l, int r)
     {
         if(l < r)
@@ -135,6 +172,18 @@ int main()
     Sort.BubbleSort(bsV);
 
     Sort.PrintVector(bsV);
+
+    cout << "\n>>> SelectionSort <<<\n";
+    vector<int> ssV = unsortedVector;
+    Sort.SelectionSort(ssV);
+
+    Sort.PrintVector(ssV);
+
+    cout << "\n>>> InsertionSort <<<\n";
+    vector<int> isV = unsortedVector;
+    Sort.InsertionSort(isV);
+
+    Sort.PrintVector(isV);
 
     cout << "\n>>> MergeSort <<<\n";
 
