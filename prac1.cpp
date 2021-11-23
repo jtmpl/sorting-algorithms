@@ -140,6 +140,47 @@ public:
         }
     }
 
+    void QuickSort(vector<int>& vect, int l, int r)
+    {
+        if(l >= r)
+        {
+            return;
+        }
+
+        int leftIndex = l, rightIndex = r;
+        int pivot = vect[l + (r-l) / 2];
+
+        while(leftIndex <= rightIndex)
+        {
+            while(vect[leftIndex] < pivot)
+            {
+                leftIndex++;
+            }
+            while(vect[rightIndex] > pivot)
+            {
+                rightIndex--;
+            }
+
+            if(leftIndex <= rightIndex)
+            {
+                int tmp = vect[leftIndex];
+                vect[leftIndex] = vect[rightIndex];
+                vect[rightIndex] = tmp;
+                leftIndex++;
+                rightIndex--;
+            }
+        }
+
+        if(l < rightIndex)
+        {
+            QuickSort(vect, l, rightIndex);
+        }
+        if(leftIndex < r)
+        {
+            QuickSort(vect, leftIndex, r);
+        }
+    }
+
     void PrintVector(const vector<int>& vect)
     {
         for(int i = 0; i < (int)vect.size(); i++)
@@ -191,6 +232,12 @@ int main()
     Sort.MergeSort(msV, 0, (int)msV.size() - 1);
 
     Sort.PrintVector(msV);
+
+    cout << "\n>>> QuickSort <<<\n";
+    vector<int> qsV = unsortedVector;
+    Sort.QuickSort(qsV, 0, (int)qsV.size() - 1);
+
+    Sort.PrintVector(qsV);
 
     cout << "\n";
 
