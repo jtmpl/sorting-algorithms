@@ -181,6 +181,69 @@ public:
         }
     }
 
+    void HeapSort(vector<int>& vect)
+    {
+        int size = (int)vect.size();
+
+        for(int i = size / 2 - 1; i >= 0; i--)
+        {
+            heapify(vect, size, i);
+        }
+
+        for(int i = size - 1; i > 0; i--)
+        {
+            int tmp = vect[0];
+            vect[0] = vect[i];
+            vect[i] = tmp;
+
+            heapify(vect, i, 0);
+        }
+    }
+
+    void heapify(vector<int>& vect, int size, int root)
+    {
+        int largestIndex = root;
+        int leftChild = root*2+1, rightChild = root*2+2;
+
+        if(leftChild < size && vect[leftChild] > vect[largestIndex])
+        {
+            largestIndex = leftChild;
+        }
+        if(rightChild < size && vect[rightChild] > vect[largestIndex])
+        {
+            largestIndex = rightChild;
+        }
+
+        if(largestIndex != root)
+        {
+            int tmp = vect[root];
+            vect[root] = vect[largestIndex];
+            vect[largestIndex] = tmp;
+
+            heapify(vect, size, largestIndex);
+        }
+    }
+
+    void ShellSort(vector<int>& vect)
+    {
+        for(int gap = (int)vect.size() / 2; gap > 0; gap /= 2)
+        {
+            for(int i = gap; i < (int)vect.size(); i++)
+            {
+                int currentItem = vect[i];
+                int j = i;
+
+                while(j >= gap && vect[j-gap] > currentItem)
+                {
+                    vect[j] = vect[j-gap];
+                    j -= gap;
+                }
+
+                vect[j] = currentItem;
+            }
+        }
+    }
+
     void PrintVector(const vector<int>& vect)
     {
         for(int i = 0; i < (int)vect.size(); i++)
@@ -238,6 +301,18 @@ int main()
     Sort.QuickSort(qsV, 0, (int)qsV.size() - 1);
 
     Sort.PrintVector(qsV);
+
+    cout << "\n>>> HeapSort <<<\n";
+    vector<int> hsV = unsortedVector;
+    Sort.HeapSort(hsV);
+
+    Sort.PrintVector(hsV);
+
+    cout << "\n>>> ShellSort <<<\n";
+    vector<int> shV = unsortedVector;
+    Sort.ShellSort(shV);
+
+    Sort.PrintVector(shV);
 
     cout << "\n";
 
