@@ -2,6 +2,10 @@
 #include <vector>
 #include <iomanip>
 #include <cstdlib>
+#include <algorithm>
+#include <chrono>
+#include <sstream>
+#include <string>
 
 using std::vector;
 using std::cout;
@@ -9,17 +13,36 @@ using std::setw;
 using std::right;
 using std::left;
 using std::rand;
+using std::string;
+using std::fixed;
+using std::setprecision;
+using std::chrono::steady_clock;
 
 class SortingAlgorithms
 {
 public:
-    vector<int> CreateTestVector(int size = 1000)
+    vector<int> CreateTestVector(int size = 1000, int order = 0)
     {
         vector<int> testVector;
 
         for(int i = 0; i < size; i++)
         {
-            testVector.push_back(rand()%size);
+            if(order == 1)
+            {
+                testVector.push_back(i);
+            }
+            else if(order == 2)
+            {
+                testVector.push_back(size-i-1);
+            }
+            else if(order == 3)
+            {
+                testVector.push_back(rand()%5);
+            }
+            else
+            {
+                testVector.push_back(rand()%size);
+            }
         }
 
         return testVector;
@@ -244,6 +267,20 @@ public:
         }
     }
 
+    void RunSort(vector<int>& vect, int algorithm)
+    {
+        switch(algorithm)
+        {
+            case 0: BubbleSort(vect); break;
+            case 1: SelectionSort(vect); break;
+            case 2: InsertionSort(vect); break;
+            case 3: MergeSort(vect, 0, (int)vect.size() - 1); break;
+            case 4: QuickSort(vect, 0, (int)vect.size() - 1); break;
+            case 5: HeapSort(vect); break;
+            case 6: ShellSort(vect); break;
+        }
+    }
+
     void PrintVector(const vector<int>& vect)
     {
         for(int i = 0; i < (int)vect.size(); i++)
@@ -265,57 +302,107 @@ private:
 };
 
 
-int main()
+const int sortCount = 7;
+const char* sortNames[sortCount] = {
+    "BubbleSort", "SelectionSort", "InsertionSort", "MergeSort",
+    "QuickSort", "HeapSort", "ShellSort"
+};
+
+void PrintUsage()
 {
+    cout << "Usage: ./prac1 [size] [random|sorted|reversed|duplicates]\n";
+    cout << "Size must be between 0 and 10000. Defaults to 1000 random items.\n";
+    cout << "Vectors are printed when there are 30 items or fewer.\n";
+}
+
+int main(int argc, char* argv[])
+{
+    int size = 1000, order = 0;
+    string pattern = "random";
+
+    if(argc == 2 && string(argv[1]) == "--help")
+    {
+        PrintUsage();
+        return 0;
+    }
+    if(argc > 3)
+    {
+        PrintUsage();
+        return 1;
+    }
+    if(argc >= 2)
+    {
+        std::istringstream sizeInput(argv[1]);
+        if(!(sizeInput >> size) || !sizeInput.eof() || size < 0 || size > 10000)
+        {
+            cout << "Invalid vector size.\n";
+            PrintUsage();
+            return 1;
+        }
+    }
+    if(argc == 3)
+    {
+        pattern = argv[2];
+        if(pattern == "sorted")
+        {
+            order = 1;
+        }
+        else if(pattern == "reversed")
+        {
+            order = 2;
+        }
+        else if(pattern == "duplicates")
+        {
+            order = 3;
+        }
+        else if(pattern != "random")
+        {
+            cout << "Unknown input pattern.\n";
+            PrintUsage();
+            return 1;
+        }
+    }
+
     SortingAlgorithms Sort;
+    vector<int> unsortedVector = Sort.CreateTestVector(size, order);
+    vector<int> expectedVector = unsortedVector;
+    std::sort(expectedVector.begin(), expectedVector.end());
 
-    vector<int> unsortedVector = Sort.CreateTestVector();
+    cout << ">>> Comparing " << size << " " << pattern << " items <<<\n";
+    if(size <= 30)
+    {
+        cout << "\n>>> Unsorted vector <<<\n";
+        Sort.PrintVector(unsortedVector);
+    }
 
-    cout << ">>> BubbleSort <<<\n";
-    vector<int> bsV = unsortedVector;
-    Sort.BubbleSort(bsV);
+    bool allCorrect = true;
+    cout << "\n" << left << setw(18) << "Algorithm" << right
+         << setw(12) << "Time (ms)" << setw(12) << "Correct" << "\n";
 
-    Sort.PrintVector(bsV);
+    for(int i = 0; i < sortCount; i++)
+    {
+        vector<int> sortedVector = unsortedVector;
+        steady_clock::time_point start = steady_clock::now();
+        Sort.RunSort(sortedVector, i);
+        steady_clock::time_point finish = steady_clock::now();
+        double time = std::chrono::duration<double, std::milli>(finish-start).count();
 
-    cout << "\n>>> SelectionSort <<<\n";
-    vector<int> ssV = unsortedVector;
-    Sort.SelectionSort(ssV);
+        bool correct = sortedVector == expectedVector;
+        if(!correct)
+        {
+            allCorrect = false;
+        }
 
-    Sort.PrintVector(ssV);
+        cout << left << setw(18) << sortNames[i] << right
+             << fixed << setprecision(3) << setw(12) << time
+             << setw(12) << (correct ? "yes" : "no") << "\n";
 
-    cout << "\n>>> InsertionSort <<<\n";
-    vector<int> isV = unsortedVector;
-    Sort.InsertionSort(isV);
+        if(size <= 30)
+        {
+            Sort.PrintVector(sortedVector);
+            cout << "\n";
+        }
+    }
 
-    Sort.PrintVector(isV);
-
-    cout << "\n>>> MergeSort <<<\n";
-
-    vector<int> msV = unsortedVector;
-    Sort.MergeSort(msV, 0, (int)msV.size() - 1);
-
-    Sort.PrintVector(msV);
-
-    cout << "\n>>> QuickSort <<<\n";
-    vector<int> qsV = unsortedVector;
-    Sort.QuickSort(qsV, 0, (int)qsV.size() - 1);
-
-    Sort.PrintVector(qsV);
-
-    cout << "\n>>> HeapSort <<<\n";
-    vector<int> hsV = unsortedVector;
-    Sort.HeapSort(hsV);
-
-    Sort.PrintVector(hsV);
-
-    cout << "\n>>> ShellSort <<<\n";
-    vector<int> shV = unsortedVector;
-    Sort.ShellSort(shV);
-
-    Sort.PrintVector(shV);
-
-    cout << "\n";
-
-
-    return 0;
+    return allCorrect ? 0 : 1;
 }
