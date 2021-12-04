@@ -6,6 +6,7 @@
 #include <chrono>
 #include <sstream>
 #include <string>
+#include <limits>
 
 using std::vector;
 using std::cout;
@@ -308,11 +309,71 @@ const char* sortNames[sortCount] = {
     "QuickSort", "HeapSort", "ShellSort"
 };
 
+int RunTests()
+{
+    SortingAlgorithms Sort;
+    vector<vector<int>> testVectors = {
+        {}, {7}, {2, 1}, {1, 2}, {4, 4, 4, 4},
+        {0, -8, 5, -3, 5, 0},
+        {std::numeric_limits<int>::min(), std::numeric_limits<int>::max(),
+         0, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()}
+    };
+
+    for(int size = 0; size <= 64; size++)
+    {
+        for(int order = 0; order < 4; order++)
+        {
+            vector<int> testVector = Sort.CreateTestVector(size, order);
+            if(order == 0)
+            {
+                for(int i = 0; i < size; i++)
+                {
+                    testVector[i] -= size / 2;
+                }
+            }
+            testVectors.push_back(testVector);
+        }
+    }
+    for(int order = 0; order < 4; order++)
+    {
+        testVectors.push_back(Sort.CreateTestVector(1000, order));
+    }
+
+    bool allCorrect = true;
+    for(int i = 0; i < sortCount; i++)
+    {
+        int passed = 0;
+        for(int j = 0; j < (int)testVectors.size(); j++)
+        {
+            vector<int> sortedVector = testVectors[j];
+            vector<int> expectedVector = testVectors[j];
+            std::sort(expectedVector.begin(), expectedVector.end());
+            Sort.RunSort(sortedVector, i);
+
+            if(sortedVector == expectedVector)
+            {
+                passed++;
+            }
+            else
+            {
+                cout << sortNames[i] << " failed on test " << j+1 << "\n";
+                allCorrect = false;
+            }
+        }
+
+        cout << left << setw(18) << sortNames[i] << passed << "/"
+             << testVectors.size() << " tests passed\n";
+    }
+
+    return allCorrect ? 0 : 1;
+}
+
 void PrintUsage()
 {
     cout << "Usage: ./prac1 [size] [random|sorted|reversed|duplicates]\n";
     cout << "Size must be between 0 and 10000. Defaults to 1000 random items.\n";
     cout << "Vectors are printed when there are 30 items or fewer.\n";
+    cout << "Use ./prac1 --test to check all the sorting algorithms.\n";
 }
 
 int main(int argc, char* argv[])
@@ -320,6 +381,10 @@ int main(int argc, char* argv[])
     int size = 1000, order = 0;
     string pattern = "random";
 
+    if(argc == 2 && string(argv[1]) == "--test")
+    {
+        return RunTests();
+    }
     if(argc == 2 && string(argv[1]) == "--help")
     {
         PrintUsage();
